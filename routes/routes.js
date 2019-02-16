@@ -2,47 +2,27 @@ const express = require("express");
 const router = express.Router();
 const passport = require("passport");
 const user = require("../db/users");
-const jwt = require('jsonwebtoken')
 require("../config/passport");
-
-
 
 router.post("/reg", (req, res) => {
   console.log(req.body);
 
   const newuser = new user({
-    email: req.body.email,
-    
+    email: req.body.email
   });
-  console.log(`email - ${req.body.email}  pass - ${req.body.password}`)
+  console.log(`email - ${req.body.email}  pass - ${req.body.password}`);
   newuser.setpass(req.body.password);
   newuser
     .save()
     .then(result => {
-        //
+      //
+
       console.log("succsess");
       res.redirect("/login1");
     })
     .catch(err => {
       res.status(403).json(err);
     });
-});
-
-router.post("/login", function(req, res, next) {
-  console.log("awoooo");
-
-  passport.authenticate("local", function(err, user, info) {
-    if (err) {
-      console.log("error");
-    }
-    if (info != undefined) {
-      console.log(info);
-      res.send(info.message);
-    } else {
-      console.log("jey");
-      res.send(user);
-    }
-  });
 });
 
 router.post("/login1", function(req, res, next) {
@@ -53,30 +33,60 @@ router.post("/login1", function(req, res, next) {
       return next(err);
     }
     if (!user) {
-        console.log("error no1");
-        console.log(info.message)
-      return res.send(user)
+      console.log("error no1");
+      console.log(info.message);
+      return res.send(user);
     }
     req.logIn(user, function(err) {
       if (err) {
         return next(err);
-      }
-      else{
+      } else {
         console.log("done");
-        var token= user.generateJWT()
-        //console.log(jwt)
-        //var sin = jwt.verify(token,'authdemo')
-        //console.log('sin '+sin.email)
-        return res.json(token)
+        var token = user.generateJWT();
+        // res.cookie("jwt", token, { httpOnly: true, secure: true });
+        return res.status(200).send(token);
       }
-      
     });
   })(req, res, next);
 });
 
+router.get('/dashboard',(req,res,next)=>{
+  passport.authenticate('jwtstrategy',{ session: false },(err,user,info)=>{
+    console.log('error - '+err)
+    console.log('user - '+user)
+    console.log('info -- '+info)
 
-router.get('/dashboard',(req,res)=>{
-    res.send('dashboard')
+    if(user){
+      res.status(401).send(info)
+    }else{
+      res.send(user)
+    }
+
+  })(req,res,next)
 })
+
+router.get(
+  "/pro",
+  passport.authenticate("jwtstrategy", { session: false }),
+  (req, res) => {
+    //console.log(req);
+    
+    console.log(" req info "+req.authInfo)
+    
+    res.send(req.user);
+    console.log("verified user");
+   // res.send("works");
+  }
+);
+
+// router.get(
+//   "/protected",
+//   passport.authenticate("jwtstrategy", { session: false }),
+//   (req, res) => {
+//     const { user } = req;
+
+//     res.status(200).send({ user });
+//   }
+// );
 
 module.exports = router;

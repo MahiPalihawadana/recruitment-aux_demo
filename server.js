@@ -16,24 +16,18 @@ app.use(cors());
 app.use(require("morgan")("dev"));
 app.use(bp.urlencoded({ extended: false }));
 app.use(bp.json());
+
+
 app.use('/usr',require('./routes/routes'))
 
 
-//app.use(express.static(path.join(__dirname, "public")));
 app.use(eh());
-// app.use(
-//   es({
-//     secret: "authdemo",
-//     cookie: { maxAge: 60000 },
-//     resave: false,
-//     saveUninitialized: false
-//   })
-// );
+
 
 const user = require("./db/users");
 //const passport = require("./config/passport");
 
-mongoose.connect(mongodbAPI, err => {
+mongoose.connect(mongodbAPI,{ useNewUrlParser: true }, err => {
   if (!err) console.log("connected to mongodb sucsessfully");
 });
 mongoose.set("debug", true);
@@ -50,6 +44,6 @@ mongoose.set("debug", true);
 
 
 
-app.listen(3000, () => {
-  console.log("listning on 3000");
+app.listen(3001, () => {
+  console.log("listning on 3001");
 });

@@ -38,18 +38,15 @@ userSchema.methods.verifypass = function(password) {
 
 userSchema.methods.generateJWT = function(){
   console.log('inside genJWT')
-  const today = new Date();
-  const expirationDate = new Date(today);
-  expirationDate.setDate(today.getMinutes() + 1);
-
-  console.log(this.email)
+  
+ // console.log(this.email)
 
   return jwt.sign(
     {
       email: this.email,
       id: this._id,
     },
-    "authdemo",{expiresIn:'1m'}
+    "authdemo",{expiresIn:'10m'}
   );
 };
 

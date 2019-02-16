@@ -1,17 +1,21 @@
 const passport = require("passport");
 const localstratergy = require("passport-local").Strategy;
+const passJWT = require("passport-jwt");
+const JWTstratagy = passJWT.Strategy;
+const ExtractJWT = passJWT.ExtractJwt;
+
 const users = require("../db/users");
 
 //module.exports = function(passport){
 passport.use(
   "local",
-  new localstratergy({ usernameField: "email" }, function(
+  new localstratergy({ usernameField: "email",session:false }, function(
     email,
     password,
     done
   ) {
     console.log("inside passport");
-    console.log(`email -${email} \npass -  ${password}\n`)
+    console.log(`email -${email} \npass -  ${password}\n`);
 
     users
       .findOne({ email: email })
@@ -19,28 +23,59 @@ passport.use(
         if (!data) {
           return done(null, false, { message: "no user found invalid email" });
         }
-        if(data){
-          console.log('user have '+data.email)
-          console.log(password)
+        if (data) {
+          console.log("user have " + data.email);
+          console.log(password);
         }
         if (data.verifypass(password)) {
           console.log("wede hari");
           return done(null, data);
-        }
-        else{
+        } else {
           return done(null, false, { message: "invalid password" });
         }
       })
       .catch(err => done(err));
 
-      passport.serializeUser(function(user, done) {
-        done(null, user);
-      });
-      
-      passport.deserializeUser(function(user, done) {
-        done(null, user);
-      });
+    passport.serializeUser(function(user, done) {
+      done(null, user);
+    });
+
+    passport.deserializeUser(function(user, done) {
+      done(null, user);
+    });
   })
+);
+
+var JJWTExtractor = function(req) {
+  var token = null;
+  if (req && req.headers.authorization)
+  {
+      token = req.headers.authorization;
+  }
+  return token;
+};
+
+passport.use(
+  "jwtstrategy",
+  new JWTstratagy(
+    {
+      jwtFromRequest: JJWTExtractor,
+      secretOrKey: "authdemo",
+    },
+    (payload, done) => {
+      console.log('in jwt passport')
+      console.log(payload);
+
+      if(payload===undefined){
+        return done(true,"errro",'not a valid user');
+      }
+
+      if (Date.now > payload.expiresIn) {
+        return done('errro',"expired",'expired');
+      }
+      return done(null, payload,'valid user');
+    }
+  )
 );
 
 // pp.use(
