@@ -1,13 +1,16 @@
 const express = require("express");
 const router = express.Router();
 const passport = require("passport");
-const user = require("../db/users");
+const User = require("../db/users");
+const ObjectID = require("mongodb").ObjectID;
 require("../config/passport");
 
 router.post("/reg", (req, res) => {
   console.log(req.body);
 
-  const newuser = new user({
+  console.log(`************${req.headers.authorization}****************`)
+
+  const newuser = new User({
     email: req.body.email
   });
   console.log(`email - ${req.body.email}  pass - ${req.body.password}`);
@@ -18,7 +21,8 @@ router.post("/reg", (req, res) => {
       //
 
       console.log("succsess");
-      res.redirect("/login1");
+      var token = result.generateJWT();
+      return res.status(200).send(token);
     })
     .catch(err => {
       res.status(403).json(err);
@@ -50,34 +54,77 @@ router.post("/login1", function(req, res, next) {
   })(req, res, next);
 });
 
-router.get('/dashboard',(req,res,next)=>{
-  passport.authenticate('jwtstrategy',{ session: false },(err,user,info)=>{
-    console.log('error - '+err)
-    console.log('user - '+user)
-    console.log('info -- '+info)
+router.get("/dashboard", (req, res, next) => {
+  passport.authenticate(
+    "jwtstrategy",
+    { session: false },
+    (err, user, info) => {
+      console.log("error - " + err);
+      console.log("user - " + user);
+      console.log("info -- " + info);
 
-    if(user){
-      res.status(401).send(info)
-    }else{
-      res.send(user)
+      if (!user) {
+        res.status(401).send(info);
+      } else {
+        res.send(user);
+      }
     }
+  )(req, res, next);
+});
 
-  })(req,res,next)
+
+
+router.get("/user/:id", (req, res, next) => {
+  passport.authenticate(
+    "jwtstrategy",
+    { session: false },
+    (err, user, info) => {
+
+      console.log("error - " + err);
+      console.log("user - " + user);
+      console.log("info -- " + info);
+      
+      console.log("hiiii");
+      var iid = req.params.id;
+      console.log(iid);
+
+      User.findById(ObjectID(iid))
+        .then(result => {
+          console.log("found" + result);
+          res.json(result);
+        })
+        .catch(err => {
+          console.log("err - " + err);
+        });
+    }
+  )(req, res, next);
+});
+
+
+
+
+router.post('/fogotpassword',(req,res)=>{
+
+  var email = req.body.email;
+
+  User.find({email:email}).then(result=>{
+    if(!result){
+      console.log(result+"not found error")
+    }
+    else{
+        console.log(result.id)
+    }
+  })
+
+
+
 })
 
-router.get(
-  "/pro",
-  passport.authenticate("jwtstrategy", { session: false }),
-  (req, res) => {
-    //console.log(req);
-    
-    console.log(" req info "+req.authInfo)
-    
-    res.send(req.user);
-    console.log("verified user");
-   // res.send("works");
-  }
-);
+router.post('/resetpassword/:id',(req,res)=>{
+
+
+
+})
 
 // router.get(
 //   "/protected",

@@ -46,7 +46,7 @@ userSchema.methods.generateJWT = function(){
       email: this.email,
       id: this._id,
     },
-    "authdemo",{expiresIn:'10m'}
+    "authdemo",{expiresIn:'1m'}
   );
 };
 
