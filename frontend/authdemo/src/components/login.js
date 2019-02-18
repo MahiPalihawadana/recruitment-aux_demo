@@ -27,6 +27,9 @@ class login extends Component {
   };
 
   componentDidMount() {
+
+   
+
     var jwt = localStorage.getItem("jwt");
     console.log("comp mount");
     console.log(jwt);
@@ -46,6 +49,10 @@ class login extends Component {
         loggedIn: false
       });
     }
+  }
+
+  fogotpasswordhandler = ()=>{
+    this.props.history.push('/fogotpassword')
   }
 
   btn1handler = e => {
@@ -136,7 +143,7 @@ class login extends Component {
                 <input type="submit" className="btn btn-primary" value="sign in" />
               </form>
               <br></br>
-              <input type="button" className="btn btn-primary" value="fogot password"  />
+              <input type="button" className="btn btn-primary" value="fogot password" onClick={this.fogotpasswordhandler}  />
             
               {showNullError && (
                 <div>

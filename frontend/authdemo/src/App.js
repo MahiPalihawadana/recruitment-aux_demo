@@ -8,6 +8,8 @@ import About from "./components/register";
 import User from "./components/dashboard";
 import Navbar from './components/navbar'
 import fogotpassword from './components/fogotpassword'
+import resetpassword from './components/resetpassword'
+
 import { BrowserRouter, Route } from "react-router-dom";
 
 class App extends Component {
@@ -21,6 +23,7 @@ class App extends Component {
           <Route path="/register" component={About} />
           <Route path="/Login" component={Login} />
           <Route path="/fogotpassword" component={fogotpassword} />
+          <Route path="/resetpassword/:id" component={resetpassword} />
         </div>
       </BrowserRouter>
     );

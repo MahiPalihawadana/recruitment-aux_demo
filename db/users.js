@@ -17,7 +17,7 @@ var userSchema = new Schema({
 });
 
 userSchema.methods.setpass = function(password) {
-  console.log(this);
+  console.log(this.email);
   this.salt = crypto.randomBytes(16).toString("hex");
   console.log(`salt = ${this.salt}`);
   this.hash = crypto

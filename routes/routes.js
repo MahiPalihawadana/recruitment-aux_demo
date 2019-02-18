@@ -4,11 +4,12 @@ const passport = require("passport");
 const User = require("../db/users");
 const ObjectID = require("mongodb").ObjectID;
 require("../config/passport");
+const emailhandler = require("../config/emailhandler");
 
 router.post("/reg", (req, res) => {
   console.log(req.body);
 
-  console.log(`************${req.headers.authorization}****************`)
+  console.log(`************${req.headers.authorization}****************`);
 
   const newuser = new User({
     email: req.body.email
@@ -72,18 +73,15 @@ router.get("/dashboard", (req, res, next) => {
   )(req, res, next);
 });
 
-
-
 router.get("/user/:id", (req, res, next) => {
   passport.authenticate(
     "jwtstrategy",
     { session: false },
     (err, user, info) => {
-
       console.log("error - " + err);
       console.log("user - " + user);
       console.log("info -- " + info);
-      
+
       console.log("hiiii");
       var iid = req.params.id;
       console.log(iid);
@@ -100,31 +98,38 @@ router.get("/user/:id", (req, res, next) => {
   )(req, res, next);
 });
 
-
-
-
-router.post('/fogotpassword',(req,res)=>{
-
+router.post("/fogotpassword", (req, res) => {
   var email = req.body.email;
 
-  User.find({email:email}).then(result=>{
-    if(!result){
-      console.log(result+"not found error")
+  User.find({ email: email }).then(result => {
+    if (!result) {
+      console.log(result + "not found error");
+      res.send("no user found");
+    } else {
+      emailhandler(email, result[0]._id);
+      console.log(result[0]._id);
+      res.json(result);
     }
-    else{
-        console.log(result.id)
-    }
-  })
+  });
+});
 
-
-
-})
-
-router.post('/resetpassword/:id',(req,res)=>{
-
-
-
-})
+router.post("/resetpassword/:id", (req, res) => {
+  id = req.params.id;
+  newpassword = req.body.password;
+  console.log(id);
+  console.log(newpassword);
+ // res.send("hahahaha  " + id);
+  User.findById(ObjectID(id))
+    .then(result => {
+      console.log("found " + result.email);
+      result.setpass('1234');
+      res.send("password changed succesfully");
+    })
+    .catch(err => {
+      console.log(err);
+      res.send("error");
+    });
+});
 
 // router.get(
 //   "/protected",
